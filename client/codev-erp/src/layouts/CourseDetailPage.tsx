@@ -115,7 +115,7 @@ export default function CourseDetailPage() {
                     ))}
                     {lessons.length === 0 && (
                         <div className="bg-white rounded-xl p-8 text-center text-gray-500">
-                            No lessons yet. Create your first lesson!
+                            No lessons yet.
                         </div>
                     )}
                 </div>

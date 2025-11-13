@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func GetCoursesHandler(ctx *gin.Context) {
@@ -229,4 +230,69 @@ func RemoveParticipantHandler(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"success": "Student removed successfully"})
+}
+
+func GetStudentCoursesHandler(ctx *gin.Context) {
+	userId := ctx.Param("id")
+	var enrolledCourses []models.EnrolledCourse
+
+	userIdInt, err := strconv.Atoi(userId)
+
+	err = db.DB.
+		Select("enrolled_courses.paid, enrolled_courses.paid_date, enrolled_courses.course_id, enrolled_courses.id").
+		Where("enrolled_courses.user_id = ?", userIdInt).
+		Preload("Course", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id, name")
+		}).
+		Find(&enrolledCourses).Error
+
+	if err != nil {
+		logger.Log("Failed to get student courses for admin! "+err.Error(), slog.LevelError)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get student courses"})
+		return
+	}
+
+	courseResponse := struct {
+		UserID  uint                    `json:"user_id"`
+		Courses []models.EnrolledCourse `json:"courses"`
+	}{
+		UserID:  uint(userIdInt),
+		Courses: enrolledCourses,
+	}
+
+	ctx.JSON(http.StatusOK, courseResponse)
+}
+
+func UpdateStudentPayments(ctx *gin.Context) {
+
+	type PaymentRequest struct {
+		UserID   uint `json:"user_id"`
+		CourseID uint `json:"course_id"`
+		Paid     bool `json:"paid"`
+	}
+
+	var request []PaymentRequest
+
+	if ctx.ShouldBindJSON(&request) != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+		return
+	}
+
+	for _, payment := range request {
+		tmstmp := time.Now().In(time.Local)
+
+		DbPaymentRequest := models.EnrolledCourse{
+			ID:       0,
+			UserID:   payment.UserID,
+			CourseID: payment.CourseID,
+			Paid:     payment.Paid,
+			PaidDate: tmstmp,
+		}
+
+		db.DB.Where("user_id = ? AND course_id = ?",
+			payment.UserID, payment.CourseID).Updates(&DbPaymentRequest)
+
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"success": "Payments updated successfully"})
 }

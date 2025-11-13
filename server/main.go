@@ -34,6 +34,8 @@ func main() {
 
 	r := gin.Default()
 	r.Static("/static", "./static")
+	r.Static("/assets", "./templates")
+
 	gin.SetMode(gin.DebugMode)
 
 	r.Use(cors.New(cors.Config{
@@ -55,6 +57,11 @@ func main() {
 	}) // expire in a day
 
 	r.Use(sessions.Sessions("session", store))
+
+	r.LoadHTMLGlob("./templates/*")
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{})
+	})
 
 	authLimiter := rate.NewLimiter(2, 6)
 

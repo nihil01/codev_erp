@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 import { motion } from "framer-motion";
 import type {Course, UserResponse} from "../constants/types.ts";
 import { Constants } from "../constants/constants.ts";
@@ -55,6 +55,7 @@ export default function AdminDashboard() {
             setStaff(data);
         }
     };
+
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-200 px-4 py-8">
@@ -293,8 +294,8 @@ function CoursesTab({ courses, setCourses, staff, users }: { courses: Course[]; 
                                 onClick={() => handleViewParticipants(course)}>
                                 {course.name}
                             </td>
-                            <td className="px-4 py-3">{course.teacher.firstName + " " + course.teacher.lastName}</td>
-                            <td className="px-4 py-3">{course.duration} months</td>
+                            <td className="px-4 py-3 text-left">{course.teacher.firstName + " " + course.teacher.lastName}</td>
+                            <td className="px-4 py-3 text-left">{course.duration} months</td>
                             <td className="px-4 py-3 text-center">
                                 <button
                                     onClick={() => handleDeleteCourse(course.id)}
@@ -521,6 +522,23 @@ function CourseParticipantsModal({ course, onClose, users }: { course: Course;
 // --- USERS TAB ---
 function UsersTab({ users, setUsers }: { users: UserResponse[]; setUsers: (u: UserResponse[]) => void }) {
     const [showForm, setShowForm] = useState(false);
+    const [dropdown, setDropdown] = useState<number>(0);
+    const [changesDetected, setChangesDetected] = useState(false);
+    const [detectChanges, setDetectChanges] = useState<{
+        user_id: number,
+        course_id: number,
+        paid: boolean,
+    }[]>([]);
+
+    const [userCourses, setUserCourses] = useState<{
+        userID: number,
+        courseList: {
+            paid: boolean,
+            paid_date: string | null,
+            Course: Course
+        }[]
+    }[]>([]);
+
     const [formData, setFormData] = useState({
         email: "",
         firstName: "",
@@ -528,6 +546,30 @@ function UsersTab({ users, setUsers }: { users: UserResponse[]; setUsers: (u: Us
         password: "",
         role: "student"
     });
+
+    const setChange = (userId: number, courseId: number, paid: boolean) => {
+        const exists = detectChanges.findIndex(item => item.user_id === userId && item.course_id === courseId);
+        if (exists !== -1) {
+            detectChanges[exists] = {user_id: userId, course_id: courseId, paid: paid};
+
+        }else{
+            setDetectChanges(prev => [...prev, {user_id: userId,
+                course_id: courseId, paid: paid}]);
+            setChangesDetected(true);
+
+        }
+
+    }
+
+    const sendChanges = async () => {
+        const response = await fetch(`${Constants.SERVER_URL}/courses/update_user_payments`, {
+            credentials: "include",
+            method: "PUT",
+            body: JSON.stringify(detectChanges)
+        })
+
+        console.log(response.ok)
+    }
 
     const handleRegister = async () => {
         const response = await fetch(`${Constants.SERVER_URL}/register`, {
@@ -545,6 +587,9 @@ function UsersTab({ users, setUsers }: { users: UserResponse[]; setUsers: (u: Us
     };
 
     const handleDeleteUser = async (id: number) => {
+        const confirmed = confirm("Are you sure you want to delete this user?");
+        if (!confirmed) return;
+
         const response = await fetch(`${Constants.SERVER_URL}/users/${id}`,
             { method: "DELETE", credentials: "include"});
         if (response.ok) {
@@ -552,10 +597,53 @@ function UsersTab({ users, setUsers }: { users: UserResponse[]; setUsers: (u: Us
         }
     };
 
+    const normalizeDate = (dateString: string): string => {
+
+        const formattedDate = new Date(dateString).toLocaleDateString();
+
+        if (formattedDate.includes("1970")) {
+            return "N/A";
+        }
+
+        return formattedDate;
+    }
+
+    async function handleDropdownChange(user: number) {
+
+        if (user && dropdown !== user) {
+            setDropdown(user);
+        }
+
+        if (userCourses.some(uc => uc.userID === user)) {
+            console.log("already obtained courses for this user");
+            return;
+        }
+
+        const response = await fetch(`${Constants.SERVER_URL}/courses/student_courses/${user}`,
+            { method: "GET", credentials: "include"});
+
+        const data = await response.json();
+        console.log("data: ", data);
+
+        if (response.ok) {
+            setUserCourses((uc) => {
+                const exists = uc.findIndex(item => item.userID === data.user_id);
+                if (exists !== -1) {
+                    const updated = [...uc];
+                    updated[exists] = { userID: data.user_id, courseList: data.courses };
+                    return updated;
+                }
+                return [...uc, { userID: data.user_id, courseList: data.courses }];
+            });
+        }
+
+    }
+
     return (
         <div>
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-semibold text-green-700">Users</h2>
+            <h2 className="text-2xl font-semibold text-green-700">Users</h2>
+
+            <div className="flex gap-5 items-center justify-end mb-6">
                 <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -563,6 +651,15 @@ function UsersTab({ users, setUsers }: { users: UserResponse[]; setUsers: (u: Us
                     className="px-4 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 shadow"
                 >
                     {showForm ? "Cancel" : "Add User"}
+                </motion.button>
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    disabled={!changesDetected}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => sendChanges()}
+                    className="px-4 py-2 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 shadow"
+                >
+                    Save changes
                 </motion.button>
             </div>
 
@@ -615,35 +712,105 @@ function UsersTab({ users, setUsers }: { users: UserResponse[]; setUsers: (u: Us
                 </motion.div>
             )}
 
-            <div className="bg-white rounded-xl shadow overflow-x-auto">
-                <table className="w-full">
+
+            <div className="overflow-x-auto">
+                <table className="bg-white rounded-xl shadow min-w-[900px] m-auto">
                     <thead className="bg-green-100">
-                    <tr>
-                        <th className="px-4 py-3 text-left text-green-700 font-semibold">Name</th>
-                        <th className="px-4 py-3 text-left text-green-700 font-semibold">Email</th>
-                        <th className="px-4 py-3 text-left text-green-700 font-semibold">Role</th>
-                        <th className="px-4 py-3 text-center text-green-700 font-semibold">Actions</th>
-                    </tr>
+                        <tr>
+                            <th className="px-4 py-3 text-left text-green-700 font-semibold"></th>
+                            <th className="px-4 py-3 text-left text-green-700 font-semibold">Name</th>
+                            <th className="px-4 py-3 text-left text-green-700 font-semibold">Email</th>
+                            <th className="px-4 py-3 text-left text-green-700 font-semibold">Role</th>
+                            <th className="px-4 py-3 text-left text-green-700 font-semibold">Last Login</th>
+                            <th className="px-4 py-3 text-center text-green-700 font-semibold">Actions</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    {users ? users.map(user => (
-                        <tr key={user.id} className="border-b hover:bg-green-50 transition">
-                            <td className="px-4 py-3">{user.firstName} {user.lastName}</td>
-                            <td className="px-4 py-3">{user.email}</td>
-                            <td className="px-4 py-3">{user.role}</td>
-                            <td className="px-4 py-3 text-center">
-                                <button
-                                    onClick={() => handleDeleteUser(user.id)}
-                                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                                >
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    )): <tr><td colSpan={4} className="px-4 py-3 text-center text-green-700">No users found</td></tr>}
+                    {users
+                        ? users.flatMap(user => [
+                            (
+                                <tr key={user.id} className="border-b hover:bg-green-50 transition">
+                                    <td onClick={() => {
+                                        handleDropdownChange(user.id).then();
+
+                                    }} className="px-4 py-3 text-left cursor-pointer">&#11015;</td>
+                                    <td className="px-4 py-3 text-left">{user.firstName} {user.lastName}</td>
+                                    <td className="px-4 py-3 text-left">{user.email}</td>
+                                    <td className="px-4 py-3 text-left">{user.role}</td>
+                                    <td className="px-4 py-3 text-left">{normalizeDate(user.lastLogin)}</td>
+                                    <td className="px-4 py-3 text-center">
+                                        <button
+                                            onClick={() => handleDeleteUser(user.id)}
+                                            className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            ),
+                            dropdown === user.id && (
+                                <tr key={`dropdown-${user.id}`} className="bg-gray-50">
+                                    <td colSpan={6} className="px-4 py-3">
+                                        <div className="p-3 border rounded shadow">
+                                            {!(userCourses && userCourses.find(uc => uc.userID === user.id)?.courseList?.length) ? (
+                                                <p>Student hasn't subscribed on any course yet.</p>
+                                            ) : (
+                                                // @ts-ignore
+                                                userCourses.find(uc => uc && (uc.userID === user.id))
+                                                    .courseList.map(course => (
+                                                    <div>
+                                                        <div className={"flex justify-between items-center mb-4"}>
+                                                            <label htmlFor={course.Course.id.toString()} className="block mb-2">
+                                                                {course.Course.name}
+                                                            </label>
+
+
+                                                            {!course.paid && (
+                                                                <motion.button
+                                                                    whileHover={{ scale: 1.05 }}
+                                                                    whileTap={{ scale: 0.95 }}
+                                                                    onClick={() => alert("*SENT REMINDER TO STUDENT (EMAIL OR WhatsApp)*")}
+                                                                    className={`cursor-pointer px-6 py-3 rounded-lg font-semibold transition shadow "bg-white text-green-700 hover:bg-green-100"`}
+                                                                >
+                                                                    Remind about payment
+                                                                </motion.button>
+                                                            )}
+
+
+                                                            <select id={course.Course.id.toString()} onChange={() =>
+                                                                setChange(user.id, course.Course.id, !course.paid)
+                                                            }>
+                                                                <option value={course.paid ? "Paid" : "Unpaid"}>
+                                                                    {course.paid ? "PAID" : "UNPAID"}
+                                                                </option>
+                                                                <option value={course.paid ? "Unpaid" : "Paid"}>
+                                                                    {course.paid ? "UNPAID" : "PAID"}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+
+                                                ))
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            )
+                        ])
+                        : (
+                            <tr>
+                                <td colSpan={6} className="px-4 py-3 text-center text-green-700">
+                                    No users found
+                                </td>
+                            </tr>
+                        )
+                    }
                     </tbody>
                 </table>
             </div>
+
         </div>
     );
 }
@@ -667,16 +834,16 @@ function StaffTab({ staff, setStaff }: { staff: UserResponse[], setStaff: (u: Us
                 <table className="w-full">
                     <thead className="bg-green-100">
                     <tr>
-                        <th className="px-4 py-3 text-left text-green-700 font-semibold">Name</th>
-                        <th className="px-4 py-3 text-left text-green-700 font-semibold">Email</th>
-                        <th className="px-4 py-3 text-left text-green-700 font-semibold"></th>
+                        <th className="px-4 py-3 text-left text-green-700 font-semibold text-left">Name</th>
+                        <th className="px-4 py-3 text-left text-green-700 font-semibold text-left">Email</th>
+                        <th className="px-4 py-3 text-left text-green-700 font-semibold text-center"></th>
                     </tr>
                     </thead>
                     <tbody>
                     { staff? staff.map(member => (
                         <tr key={member.id} className="border-b hover:bg-green-50 transition">
-                            <td className="px-4 py-3">{member.firstName} {member.lastName}</td>
-                            <td className="px-4 py-3">{member.email}</td>
+                            <td className="px-4 py-3 text-left">{member.firstName} {member.lastName}</td>
+                            <td className="px-4 py-3 text-left">{member.email}</td>
 
                             <td className="px-4 py-3 text-center">
                                 <button

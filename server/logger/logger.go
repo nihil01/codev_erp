@@ -1,9 +1,8 @@
 package logger
 
 import (
-	"log/slog"
-
 	"github.com/natefinch/lumberjack"
+	"log/slog"
 )
 
 var logger *slog.Logger
@@ -17,7 +16,7 @@ func SetupDatabaseLogger() {
 		Compress:   true,
 	}
 
-	var customLogger = slog.New(slog.NewJSONHandler(rotator, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	customLogger := slog.New(slog.NewJSONHandler(rotator, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	logger = customLogger
 
 	logger.LogAttrs(nil, slog.LevelInfo, "Logger initialized successfully !")

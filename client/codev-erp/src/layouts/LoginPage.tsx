@@ -98,6 +98,7 @@ export default function LoginPage() {
                                 key={r.value}
                                 type="button"
                                 onClick={() =>
+
                                     setUser((u) => ({ ...u, role: r.value }))
                                 }
                                 whileHover={{ scale: 1.08 }}

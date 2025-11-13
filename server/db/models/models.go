@@ -39,13 +39,13 @@ type Course struct {
 }
 
 type EnrolledCourse struct {
-	ID        uint `gorm:"primaryKey"`
-	UserID    uint `gorm:"not null"`
-	CourseID  uint `gorm:"not null"`
+	ID        uint `gorm:"primaryKey" json:"-"`
+	UserID    uint `gorm:"not null" json:"-"`
+	CourseID  uint `gorm:"not null" json:"-"`
 	StartDate time.Time
 	EndDate   time.Time
-	Paid      bool
-	PaidDate  *time.Time
+	Paid      bool      `json:"paid"`
+	PaidDate  time.Time `json:"paid_date"`
 
 	// Референсы (внешние ключи)
 	User   User   `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`

@@ -1,5 +1,5 @@
 export type LoginUser = {
-    role: "staff" | "student";
+    role: "staff" | "student" | "admin";
     email: string;
     password: string;
     remember: boolean;
