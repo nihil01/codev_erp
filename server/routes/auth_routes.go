@@ -16,7 +16,7 @@ func AuthRoutes(r *gin.Engine, rateLimiter *rate.Limiter) {
 
 	r.GET("/check_auth", auth_handlers.AuthHandler)
 	r.GET("/logout", auth_handlers.LogoutHandler)
-	r.POST("/register", middleware.CheckAdmin(), auth_handlers.RegisterHandler)
-	r.DELETE("/users/:id", middleware.CheckAdmin(), auth_handlers.DeleteHandler)
+	r.POST("/register", middleware.ValidateUser("admin"), auth_handlers.RegisterHandler)
+	r.DELETE("/users/:id", middleware.ValidateUser("admin"), auth_handlers.DeleteHandler)
 
 }

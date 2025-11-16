@@ -49,7 +49,7 @@ export default function CourseDetailPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-200 px-4 py-8">
+        <div className="order-2 min-h-screen bg-gradient-to-b from-green-50 to-green-200 px-4 py-8">
             <div className="max-w-6xl mx-auto">
                 {/* Шапка курса */}
                 <motion.div
@@ -88,7 +88,7 @@ export default function CourseDetailPage() {
 
                 </motion.div>
 
-                {currentUser?.role === "staff" && (
+                {currentUser?.role === "teacher" && (
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-bold text-green-700">Lessons</h2>
                         <motion.button
@@ -518,7 +518,7 @@ function LessonDetailModal({ lesson, onClose, onUpdate }: {
                 {/* Табы */}
                 <div className="flex gap-2 mb-6 border-b border-green-200">
                     {
-                        currentUser?.role === "staff" && (
+                        currentUser?.role === "teacher" && (
 
                             <button
                                 onClick={() => setActiveTab("add")}
@@ -545,7 +545,7 @@ function LessonDetailModal({ lesson, onClose, onUpdate }: {
                     </button>
 
                     {
-                        currentUser?.role === "staff" && (
+                        currentUser?.role === "teacher" && (
 
                             <button
                                 onClick={() => setActiveTab("rate")}
@@ -563,7 +563,7 @@ function LessonDetailModal({ lesson, onClose, onUpdate }: {
 
 
                     {
-                        currentUser?.role === "staff" && (
+                        currentUser?.role === "teacher" && (
 
                             <button
                                 onClick={() => setActiveTab("screenrecord")}

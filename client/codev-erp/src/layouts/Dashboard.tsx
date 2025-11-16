@@ -3,13 +3,12 @@ import {Link} from "wouter";
 import {useAuth} from "../providers/AuthProvider.tsx";
 import {useEffect, useState} from "react";
 import type {Course} from "../constants/types.ts";
-import {getCourses, logout} from "../net/HttpRequests.ts";
+import {getCourses} from "../net/HttpRequests.ts";
 import {Constants} from "../constants/constants.ts";
 
 export default function Dashboard() {
     const { currentUser } = useAuth();
     const [courses, setCourses] = useState<Course[]>([]);
-    const [open, setOpen] = useState(false);
 
     useEffect(() => {
 
@@ -27,43 +26,8 @@ export default function Dashboard() {
 
     return (
         <>
-            <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-200 px-4 py-8">
+            <div className="order-2 min-h-screen bg-gradient-to-b from-green-50 to-green-200 px-4 py-8">
                 <div className="max-w-6xl mx-auto">
-                    <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8">
-                        <motion.div
-                            initial={{ opacity: 0, y: -8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -8 }}
-                            transition={{ duration: 0.22 }}
-                            className="absolute right-5 mt-2 w-20 rounded-xl shadow-lg bg-white border border-green-100 z-50"
-                        >
-                            <button
-                                onClick={() => setOpen(o => !o)}
-                                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold shadow"
-                            >
-                                Menu
-                            </button>
-
-                            {open && (
-                                <div className="absolute right-0 mt-2 w-36 rounded-xl shadow-lg bg-white border z-40">
-                                    <Link
-                                        to="/profile"
-                                        className="block px-4 py-2 text-green-900 hover:bg-green-100 rounded-t-xl transition"
-                                        onClick={() => setOpen(false)}
-                                    >
-                                        Profile
-                                    </Link>
-                                    <button
-                                        className="block w-full px-4 py-2 text-red-500 hover:bg-green-100 rounded-b-xl transition"
-                                        onClick={() => { logout().then(); setOpen(false); }}
-                                    >
-                                        Logout
-                                    </button>
-                                </div>
-                            )}
-                        </motion.div>
-                    </div>
-
                     <motion.div
                         initial="hidden"
                         animate="visible"

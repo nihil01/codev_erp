@@ -2,8 +2,6 @@ import {useState, useEffect} from "react";
 import { motion } from "framer-motion";
 import type {Course, UserResponse} from "../constants/types.ts";
 import { Constants } from "../constants/constants.ts";
-import {Link} from "wouter";
-import {logout} from "../net/HttpRequests.ts";
 
 type Tab = "courses" | "users" | "staff";
 
@@ -12,19 +10,20 @@ export default function AdminDashboard() {
     const [courses, setCourses] = useState<Course[]>([]);
     const [users, setUsers] = useState<UserResponse[]>([]);
     const [staff, setStaff] = useState<UserResponse[]>([]);
-    const [open, setOpen] = useState(false);
 
     // Загрузка данных при смене табов
     useEffect(() => {
         if (activeTab === "courses") {
             fetchCourses();
-            fetchStaff();
+            fetchTeachers();
             fetchUsers();
 
         } else if (activeTab === "users") {
             fetchUsers();
+
         } else if (activeTab === "staff") {
             fetchStaff();
+
         }
     }, [activeTab]);
 
@@ -46,8 +45,18 @@ export default function AdminDashboard() {
         }
     };
 
-    const fetchStaff = async () => {
+    const fetchTeachers = async () => {
         const response = await fetch(`${Constants.SERVER_URL}/get_users?students=false`,
+            {credentials: "include"});
+
+        if (response.ok) {
+            const data = await response.json();
+            setStaff(data);
+        }
+    };
+
+    const fetchStaff = async () => {
+        const response = await fetch(`${Constants.SERVER_URL}/get_users?students=all`,
             {credentials: "include"});
 
         if (response.ok) {
@@ -58,51 +67,8 @@ export default function AdminDashboard() {
 
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-200 px-4 py-8">
-
-            <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.22 }}
-                className="absolute right-5 mt-2 w-20 rounded-xl shadow-lg bg-white border border-green-100 z-50"
-            >
-                <button
-                    onClick={() => setOpen(o => !o)}
-                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold shadow"
-                >
-                    Menu
-                </button>
-
-                {open && (
-                    <div className="absolute right-0 mt-2 w-36 rounded-xl shadow-lg bg-white border z-40">
-                        <Link
-                            to="/profile"
-                            className="block px-4 py-2 text-green-900 hover:bg-green-100 rounded-t-xl transition"
-                            onClick={() => setOpen(false)}
-                        >
-                            Profile
-                        </Link>
-                        <button
-                            className="block w-full px-4 py-2 text-red-500 hover:bg-green-100 rounded-b-xl transition"
-                            onClick={() => { logout(); setOpen(false); }}
-                        >
-                            Logout
-                        </button>
-                    </div>
-                )}
-            </motion.div>
-
+        <div className="order-2 min-h-screen bg-gradient-to-b from-green-50 to-green-200 px-4 py-8">
             <div className="max-w-7xl mx-auto">
-                <motion.h1
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-4xl font-bold text-green-700 mb-8"
-                >
-                    Admin Dashboard
-                </motion.h1>
-
-                {/* Табы */}
                 <div className="flex gap-4 mb-8 flex-wrap">
                     {(["courses", "users", "staff"] as Tab[]).map(tab => (
                         <motion.button
@@ -150,6 +116,8 @@ function CoursesTab({ courses, setCourses, staff, users }: { courses: Course[]; 
     const [duration, setDuration] = useState(1);
     const [previewImage, setPreviewImage] = useState<File | null>(null);
     const [teacher, setTeacher] = useState(0);
+    const [price, setPrice] = useState(200);
+
 
     useEffect(() => {
         if (staff && staff.length > 0) {
@@ -164,6 +132,7 @@ function CoursesTab({ courses, setCourses, staff, users }: { courses: Course[]; 
         formData.append("description", description);
         formData.append("duration", String(duration));
         formData.append("teacher_id", String(teacher));
+        formData.append("price", String(price));
 
         if (previewImage) {
             formData.append("preview_image", previewImage);
@@ -184,6 +153,7 @@ function CoursesTab({ courses, setCourses, staff, users }: { courses: Course[]; 
             setDuration(1);
             setPreviewImage(null);
             setTeacher(staff[0]?.id || 0);
+            setPrice(200);
 
             location.reload();
         }
@@ -249,6 +219,12 @@ function CoursesTab({ courses, setCourses, staff, users }: { courses: Course[]; 
                         accept="image/*"
                         className="w-full px-3 py-2 border rounded mb-3"
                         onChange={e => setPreviewImage(e.target.files?.[0] || null)}
+                    />
+                    <input
+                        type="number"
+                        placeholder={"Price (₼)"}
+                        className="w-full px-3 py-2 border rounded mb-3"
+                        onChange={e => setPrice(Number(e.target.value))}
                     />
 
                     <label htmlFor={"teacherSelect"} className="block text-green-700 mb-2">Teacher:</label>
@@ -701,7 +677,9 @@ function UsersTab({ users, setUsers }: { users: UserResponse[]; setUsers: (u: Us
                         onChange={e => setFormData({ ...formData, role: e.target.value })}
                     >
                         <option value="student">Student</option>
-                        <option value="staff">Staff</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="sales">Sales</option>
+                        <option value="lead">Lead</option>
                     </select>
                     <button
                         onClick={handleRegister}
@@ -836,6 +814,7 @@ function StaffTab({ staff, setStaff }: { staff: UserResponse[], setStaff: (u: Us
                     <tr>
                         <th className="px-4 py-3 text-left text-green-700 font-semibold text-left">Name</th>
                         <th className="px-4 py-3 text-left text-green-700 font-semibold text-left">Email</th>
+                        <th className="px-4 py-3 text-left text-green-700 font-semibold text-left">Role</th>
                         <th className="px-4 py-3 text-left text-green-700 font-semibold text-center"></th>
                     </tr>
                     </thead>
@@ -844,6 +823,8 @@ function StaffTab({ staff, setStaff }: { staff: UserResponse[], setStaff: (u: Us
                         <tr key={member.id} className="border-b hover:bg-green-50 transition">
                             <td className="px-4 py-3 text-left">{member.firstName} {member.lastName}</td>
                             <td className="px-4 py-3 text-left">{member.email}</td>
+                            <td className="px-4 py-3 text-left">{member.role}</td>
+
 
                             <td className="px-4 py-3 text-center">
                                 <button

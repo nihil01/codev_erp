@@ -131,7 +131,7 @@ export default function ProfileView() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-200 flex items-center justify-center px-4 py-8">
+        <div className="order-2 min-h-screen bg-gradient-to-b from-green-50 to-green-200 flex items-center justify-center px-4 py-8">
             <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}

@@ -29,7 +29,7 @@ func GenerateTables() {
 	if DB != nil {
 		logger.Log("Generating tables...", slog.LevelInfo)
 		err := DB.AutoMigrate(&models.User{}, &models.Course{}, &models.EnrolledCourse{},
-			&models.Lesson{}, &models.LessonTasks{}, &models.UsersHomework{})
+			&models.Lesson{}, &models.LessonTasks{}, &models.UsersHomework{}, &models.Lead{})
 
 		if err != nil {
 			logger.Log("Failed to generate tables! Error: "+err.Error(), slog.LevelError)

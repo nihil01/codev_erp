@@ -1,5 +1,5 @@
 export type LoginUser = {
-    role: "staff" | "student" | "admin";
+    role: "lead" | "student" | "admin" | "teacher" | "sales";
     email: string;
     password: string;
     remember: boolean;
@@ -7,7 +7,7 @@ export type LoginUser = {
 
 export type UserResponse = {
     id: number;
-    role: "staff" | "student" | "admin";
+    role: "lead" | "student" | "admin" | "teacher" | "sales";
     email: string;
     firstName: string;
     lastName: string;

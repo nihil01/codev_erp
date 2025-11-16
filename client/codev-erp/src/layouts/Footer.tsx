@@ -1,5 +1,7 @@
+
+
 export const Footer = () => (
-    <footer className="bg-gradient-to-b from-green-100 to-green-200 py-8 px-4 mt-auto">
+    <footer className="bg-gradient-to-b from-green-100 to-green-200 py-8 px-4 mt-auto order-3">
         <div className="max-w-6xl mx-auto">
             <div className="flex flex-col items-center space-y-6">
                 {/* Социальные иконки */}

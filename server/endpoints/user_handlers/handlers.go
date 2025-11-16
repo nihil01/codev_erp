@@ -69,6 +69,7 @@ func GetAllUsersHandler(ctx *gin.Context) {
 	var userModel []models.User
 
 	fetchStudents := ctx.Query("students") == "true"
+	fetchAllStaff := ctx.Query("students") == "all"
 
 	if fetchStudents {
 		err := db.DB.Where("role = ?", "student").Find(&userModel).Error
@@ -77,8 +78,16 @@ func GetAllUsersHandler(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get students by admin request"})
 			return
 		}
+	} else if fetchAllStaff {
+		err := db.DB.Where("role != ? AND role != ?", "student", "admin").Find(&userModel).Error
+
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get students by admin request"})
+			return
+		}
+
 	} else {
-		err := db.DB.Where("role = ?", "staff").Find(&userModel).Error
+		err := db.DB.Where("role = ?", "teacher").Find(&userModel).Error
 
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get teachers by admin request"})

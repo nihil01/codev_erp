@@ -15,7 +15,7 @@ type User struct {
 	FirstName  string     `gorm:"not null" json:"firstName"`
 	LastName   string     `gorm:"not null" json:"lastName"`
 	Password   string     `gorm:"not null" json:"-"`
-	Role       string     `gorm:"check (role in ('staff', 'student', 'admin'))" json:"role"`
+	Role       string     `gorm:"check: role in ('teacher', 'student', 'admin', 'lead', 'sales')" json:"role"`
 	Registered time.Time  `gorm:"default:CURRENT_TIMESTAMP" json:"registered"`
 	LastLogin  *time.Time `json:"lastLogin"`
 	Avatar     *string    `json:"avatar"`
@@ -31,6 +31,7 @@ type Course struct {
 	Description  string `gorm:"not null" json:"description"`
 	PreviewImage string `gorm:"not null" json:"previewImage"`
 	Duration     string `gorm:"not null" json:"duration"`
+	Price        string `gorm:"not null" json:"price"`
 
 	TeacherID *uint // внешний ключ
 	Teacher   User  `gorm:"foreignKey:TeacherID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"teacher"`
@@ -85,6 +86,19 @@ type UsersHomework struct {
 
 	User   User   `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"user"`
 	Lesson Lesson `gorm:"foreignKey:LessonID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"lesson"`
+}
+
+type Lead struct {
+	ID          uint      `gorm:"primaryKey" json:"id"`
+	Description string    `gorm:"not null;type:text" json:"description"`
+	Name        string    `gorm:"not null;type:text" json:"name"`
+	Date        time.Time `gorm:"not null;timestamp" json:"date"`
+	Phone       string    `gorm:"not null;type:text" json:"phone"`
+	Nickname    string    `gorm:"not null;type:text" json:"igNick"`
+	Source      string    `gorm:"not null;type:text;check (source in ('dm', 'story', 'wp', 'ad'))" json:"source"`
+	Status      string    `gorm:"not null;type:text;check (source in ('new', 'answered', 'awaiting', 'demo'))" json:"status"`
+	Author      string    `gorm:"not null;type:text" json:"author"`
+	Course      string    `gorm:"not null;type:text" json:"course"`
 }
 
 //automatically hash user's password

@@ -1,8 +1,9 @@
 package logger
 
 import (
-	"github.com/natefinch/lumberjack"
 	"log/slog"
+
+	"github.com/natefinch/lumberjack"
 )
 
 var logger *slog.Logger

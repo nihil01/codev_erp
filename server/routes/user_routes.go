@@ -11,6 +11,6 @@ func UserRoutes(r *gin.Engine) {
 
 	r.GET("/profile/:id", user_handlers.GetProfileHandler)
 	r.PUT("/avatar_update", user_handlers.AvatarUpdateHandler)
-	r.GET("/get_users", middleware.CheckAdmin(), user_handlers.GetAllUsersHandler)
+	r.GET("/get_users", middleware.ValidateUser("admin"), user_handlers.GetAllUsersHandler)
 
 }

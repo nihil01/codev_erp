@@ -4,34 +4,65 @@ import { motion } from "framer-motion";
 import type {LoginUser} from "../constants/types.ts";
 import {loginRequest} from "../net/HttpRequests.ts";
 
-const roles: { label: string; value: "staff" | "student" | "admin"; icon: JSX.Element }[] = [
+const roles: { label: string; value: "teacher" | "student" | "admin" | "lead" | "sales"; icon: JSX.Element }[] = [
     {
-        label: "Staff",
-        value: "staff",
+        label: "Teacher",
+        value: "teacher",
         icon: (
+            // Teacher: книгу/доску
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="8" r="4" strokeWidth="2" />
-                <path d="M4 20c0-4 16-4 16 0" strokeWidth="2" />
+                <rect x="3" y="4" width="18" height="14" rx="2" strokeWidth="2" />
+                <path d="M7 8h10M7 12h4" strokeWidth="2" />
             </svg>
         )
     },
+
     {
         label: "Student",
         value: "student",
         icon: (
+            // Student: шапка выпускника
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M12 6l-8 4 8 4 8-4-8-4z" strokeWidth="2" />
-                <path d="M6 10v4c0 2 2.686 4 6 4s6-2 6-4v-4" strokeWidth="2" />
+                <path d="M12 6l-9 4.5 9 4.5 9-4.5-9-4.5z" strokeWidth="2" />
+                <path d="M12 15v5" strokeWidth="2" />
+                <path d="M7 12.5v2.5c0 2 2.686 3.5 5 3.5s5-1.5 5-3.5v-2.5" strokeWidth="2" />
             </svg>
         )
     },
+
     {
         label: "Admin",
         value: "admin",
         icon: (
+            // Admin: иконка щита с галочкой — символ безопасности и управления
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="8" r="4" strokeWidth="2" />
-                <path d="M4 20c0-4 16-4 16 0" strokeWidth="2" />
+                <path strokeWidth="2" d="M12 2l7 4v6c0 5-5 8-7 8s-7-3-7-8V6l7-4z" />
+                <path strokeWidth="2" d="M9 12l2 2 4-4" />
+            </svg>
+        )
+    },
+
+    {
+        label: "Lead",
+        value: "lead",
+        icon: (
+            // Lead: иконка звезды — символ лидерства и достижения
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeWidth="2" d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z" />
+            </svg>
+        )
+    },
+
+    {
+        label: "Sales",
+        value: "sales",
+        icon: (
+            // Sales: значок графика роста/денежная монета
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="3" y="10" width="4" height="8" strokeWidth="2" />
+                <rect x="9" y="6" width="4" height="12" strokeWidth="2" />
+                <rect x="15" y="2" width="4" height="16" strokeWidth="2" />
+                <path d="M3 18h18" strokeWidth="2" />
             </svg>
         )
     }
@@ -39,7 +70,7 @@ const roles: { label: string; value: "staff" | "student" | "admin"; icon: JSX.El
 
 export default function LoginPage() {
     const [user, setUser] = useState<LoginUser>({
-        role: "staff",
+        role: "student",
         email: "",
         password: "",
         remember: false
@@ -92,7 +123,7 @@ export default function LoginPage() {
                     className="mb-6"
                 >
                     <div className="mb-3 flex justify-center font-medium text-green-700">I am</div>
-                    <div className="flex justify-center space-x-6">
+                    <div className="grid grid-cols-3 gap-4 text-center ">
                         {roles.map((r) => (
                             <motion.button
                                 key={r.value}

@@ -61,7 +61,7 @@ func GetCoursesHandler(ctx *gin.Context) {
 			Where("enrolled_courses.user_id = ?", user.ID).
 			Find(&courses).Error
 
-	case "staff":
+	case "teacher":
 		err = db.DB.
 			Preload("Teacher").
 			Where("teacher_id = ?", user.ID).
@@ -89,7 +89,7 @@ func AddCourseHandler(ctx *gin.Context) {
 	logger.Log("Form: ", slog.LevelDebug)
 
 	if form == nil || form.Value["name"] == nil || form.Value["description"] == nil || form.Value["duration"] == nil ||
-		form.Value["teacher_id"] == nil || form.File["preview_image"] == nil {
+		form.Value["teacher_id"] == nil || form.File["preview_image"] == nil || form.Value["price"] == nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
@@ -110,6 +110,7 @@ func AddCourseHandler(ctx *gin.Context) {
 		PreviewImage: filename,
 		Duration:     form.Value["duration"][0],
 		TeacherID:    &teacherId,
+		Price:        form.Value["price"][0],
 	}
 
 	if err := db.DB.Create(&course).Error; err != nil {

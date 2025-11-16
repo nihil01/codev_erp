@@ -182,7 +182,12 @@ func RegisterHandler(ctx *gin.Context) {
 	userToBeSaved.LastName = pendingUser.LastName
 	userToBeSaved.Role = pendingUser.Role
 
-	db.DB.Create(&userToBeSaved)
+	err := db.DB.Create(&userToBeSaved).Error
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		return
+	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
 		"success": "User created",

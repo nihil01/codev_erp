@@ -91,7 +91,7 @@ func GetLessonsHandler(ctx *gin.Context) {
 }
 
 func checkCourseEnrollment(userID int, courseID int, role string) (bool, string) {
-	if role == "staff" {
+	if role == "teacher" {
 		var course models.Course
 		err := db.DB.Where("teacher_id = ? AND id = ?", userID, courseID).First(&course).Error
 		if err != nil {
