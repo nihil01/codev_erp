@@ -101,6 +101,19 @@ type Lead struct {
 	Course      string    `gorm:"not null;type:text" json:"course"`
 }
 
+type Sales struct {
+	ID       uint   `gorm:"primaryKey" json:"id"`
+	LeadID   uint   `gorm:"not null" json:"leadID"`
+	LastCall string `gorm:"type:text" json:"lastCall"`
+	Paid     bool   `json:"paid"`
+	Result   string `gorm:"type:text" json:"result"`
+	GroupID  uint   `gorm:"not null" json:"group"`
+	Note     string `gorm:"type:text" json:"note"`
+
+	Lead   Lead   `gorm:"foreignKey:LeadID" json:"lead"`
+	Course Course `gorm:"foreignKey:GroupID" json:"course"`
+}
+
 //automatically hash user's password
 
 func (user *User) BeforeCreate(*gorm.DB) (err error) {

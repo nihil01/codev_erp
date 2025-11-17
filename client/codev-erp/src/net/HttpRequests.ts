@@ -100,8 +100,6 @@ const logout = async () => {
         method: "GET",
         credentials: "include"
     })
-
-    location.reload();
 }
 
 

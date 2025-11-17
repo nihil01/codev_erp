@@ -12,13 +12,15 @@ export const LeadPage = () => {
     const { currentUser } = useAuth();
     const [rowAdded, setRowAdded] = useState(false);
     const [leads, setLeads] = useState<LeadRow[]>( [])
+    const [courses, setCourses] = useState<string[]>([])
 
     const [rowData, setRowData] = useState<LeadRow>({date: "", description: "", igNick: "",
         name: "", phone: "", source: "dm", status: "new", author: currentUser?.email ?? "", course: ""});
 
 
     useEffect(() => {
-        getLeads().then()
+        getLeads().then();
+        getAllCourses().then();
     }, []);
 
     const sendLeadRequest = async () => {
@@ -32,6 +34,11 @@ export const LeadPage = () => {
                 break
             }
 
+        }
+
+        if (rowData.course === "NO COURSE" || rowData.course === "-- Select Course --"){
+            alert("Select a valid course !");
+            return
         }
 
         if (emptyValueFound) {
@@ -71,6 +78,25 @@ export const LeadPage = () => {
             const data = await response.json();
             setLeads(data);
         }
+    }
+
+    const getAllCourses = async () => {
+
+        const response = await fetch(`${Constants.SERVER_URL}/courses_all`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+        });
+
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log(data)
+            setCourses(data);
+        }
+
     }
 
     const deleteLead = async (id: number) => {
@@ -203,10 +229,20 @@ export const LeadPage = () => {
                             </td>
 
                             <td className="px-4 py-3 text-left">
-                                <input type={"text"} className={"border border-green-500 rounded-md"} onChange={(e) =>
-                                    setRowData(prev => ({...prev, course: e.target.value}))}/>
-                            </td>
+                                <select className={"border border-green-500 rounded-md"} onChange={(e)=>
+                                    setRowData(prev => ({...prev, course: e.target.value}))}>
+                                    <option>-- Select Course --</option>
 
+                                    {
+                                        courses.length > 0 ? courses.map((course, index) => (
+
+                                            <option value={course} key={index}>{course}</option>
+
+                                        )) : <option>NO COURSES</option>
+                                    }
+
+                                </select>
+                            </td>
 
                             <td className="px-4 py-3 text-left">
                                 <select className={"border border-green-500 rounded-md"} onChange={(e) =>

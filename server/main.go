@@ -71,6 +71,7 @@ func main() {
 	routes.UserRoutes(r)
 	routes.LessonRoutes(r)
 	routes.LeadRoutes(r)
+	routes.SalesRoutes(r)
 
 	err := r.Run(":8080")
 

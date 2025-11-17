@@ -73,7 +73,26 @@ func AddLead(ctx *gin.Context) {
 	}
 
 	db.DB.Create(&LeadModel)
-	ctx.JSON(http.StatusCreated, gin.H{"success": "Lead created successfully"})
+
+	//also create sales model
+	var Course models.Course
+	db.DB.Where("name = ?", req.Course).First(&Course)
+
+	if Course.ID == 0 {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Course not found by provided name"})
+		return
+	}
+
+	var Sales models.Sales
+
+	Sales.Lead = LeadModel
+	Sales.LeadID = LeadModel.ID
+	Sales.Course = Course
+	Sales.GroupID = Course.ID
+
+	db.DB.Create(&Sales)
+
+	ctx.JSON(http.StatusCreated, gin.H{"success": "Lead & Sales created successfully"})
 }
 
 func GetLeads(ctx *gin.Context) {

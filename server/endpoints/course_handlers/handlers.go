@@ -82,6 +82,25 @@ func GetCoursesHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, courses)
 }
 
+func GetAvailableCoursesGlobal(ctx *gin.Context) {
+
+	var Courses []models.Course
+	var CourseNames []string
+
+	if err := db.DB.Find(&Courses).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get courses"})
+		return
+	}
+
+	for _, name := range Courses {
+
+		CourseNames = append(CourseNames, name.Name)
+
+	}
+
+	ctx.JSON(http.StatusOK, CourseNames)
+}
+
 //Administrator-specific handlers
 
 func AddCourseHandler(ctx *gin.Context) {

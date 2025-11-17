@@ -24,9 +24,19 @@ export type Course = {
     teacher: UserResponse;
     description: string;
     duration: number;
-    lessons?: Lesson[]; // добавлено (опционально)
+    lessons?: Lesson[];
 };
 
+export type Lead = {
+    id: number;
+    author: string;
+    description: string;
+    name: string;
+    phone: string;
+    paid: boolean;
+    result: string;
+    group: number;
+}
 
 export type Lesson = {
     id: number;

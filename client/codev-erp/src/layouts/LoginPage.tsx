@@ -3,6 +3,7 @@ import type { JSX } from "react";
 import { motion } from "framer-motion";
 import type {LoginUser} from "../constants/types.ts";
 import {loginRequest} from "../net/HttpRequests.ts";
+import {useLocation} from "wouter";
 
 const roles: { label: string; value: "teacher" | "student" | "admin" | "lead" | "sales"; icon: JSX.Element }[] = [
     {
@@ -76,6 +77,8 @@ export default function LoginPage() {
         remember: false
     });
 
+    const [_, navigate] = useLocation();
+
 
     const sendLoginRequest = async (e: any) => {
 
@@ -92,7 +95,9 @@ export default function LoginPage() {
 
             // @ts-ignore
             if (data["success"]){
-                location.reload();
+                navigate("/dashboard");
+            }else{
+                alert(data.error)
             }
 
 
@@ -106,16 +111,13 @@ export default function LoginPage() {
 
     // @ts-ignore
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-green-100 to-green-200">
+        <div className="order-2 min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-green-100 to-green-200">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
                 className="w-full max-w-md p-8 rounded-xl shadow-md bg-white"
             >
-                <div className="flex flex-col items-center mb-8">
-                    <img src="http://localhost:8080/static/codev_logo.png" alt="Logo" className="w-auto h-16 mb-4" />
-                </div>
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}

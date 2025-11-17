@@ -9,6 +9,8 @@ import {Header} from "./layouts/Header.tsx";
 import {Footer} from "./layouts/Footer.tsx";
 import {LeadPage} from "./layouts/LeadPage.tsx";
 import Dashboard from "./layouts/Dashboard.tsx";
+import {SalesPage} from "./layouts/SalesPage.tsx";
+
 
 
 const App = () => {
@@ -29,12 +31,16 @@ const App = () => {
                         )}
                     </Route>
 
+                    <Route path="/login">
+                        <LoginPage />
+                    </Route>
+
                     <Route path="/dashboard">
                         {isLoggedIn && currentUser ? (
                             currentUser.role === "admin" ? <AdminDashboard/> :
                             currentUser.role === "teacher" ? <Dashboard/> :
                             currentUser.role === "student" ? <Dashboard/> :
-                            currentUser.role === "lead" ? <LeadPage/> : <></>
+                            currentUser.role === "lead" ? <LeadPage/> : <SalesPage/>
                         ) : (
                             <Redirect to="/" />
                         )}
