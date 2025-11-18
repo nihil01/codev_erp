@@ -1,23 +1,6 @@
-import type {Course, LoginUser, UserResponse} from "../constants/types.ts";
+import type {Course, UserResponse} from "../constants/types.ts";
 import {Constants} from "../constants/constants.ts";
 import React from "react";
-
-async function loginRequest(user: LoginUser) {
-
-    const response: Response = await fetch(`${Constants.SERVER_URL}/login`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(user)
-    })
-
-    const data = await response.json();
-    console.log(data);
-    return data;
-}
-
 
 async function checkAuthRequest(): Promise<UserResponse | null> {
 
@@ -103,4 +86,4 @@ const logout = async () => {
 }
 
 
-export {loginRequest, checkAuthRequest, getCourses, getUserProfile, uploadAvatar, logout};
+export {checkAuthRequest, getCourses, getUserProfile, uploadAvatar, logout};
