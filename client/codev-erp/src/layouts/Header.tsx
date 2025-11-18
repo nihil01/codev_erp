@@ -72,9 +72,14 @@ export const Header = () => {
                     <button
                         className="block w-full px-4 py-2 text-red-500 hover:bg-green-100 rounded-b-xl transition"
                         onClick={() => {
-                            logout().then();
-                            setOpen(false);
-                            navigate("/login");
+                            logout().then(() => {
+                                setTimeout(() => {
+                                        setOpen(false);
+                                        navigate("/login");
+                                    }
+                                , 500)
+                            });
+
                         }}
                     >
                         Logout
