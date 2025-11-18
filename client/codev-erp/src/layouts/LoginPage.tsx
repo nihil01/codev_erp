@@ -2,8 +2,8 @@ import { useState } from "react";
 import type { JSX } from "react";
 import { motion } from "framer-motion";
 import type {LoginUser} from "../constants/types.ts";
-import {loginRequest} from "../net/HttpRequests.ts";
 import {useLocation} from "wouter";
+import {useAuth} from "../providers/AuthProvider.tsx";
 
 const roles: { label: string; value: "teacher" | "student" | "admin" | "lead" | "sales"; icon: JSX.Element }[] = [
     {
@@ -70,6 +70,9 @@ const roles: { label: string; value: "teacher" | "student" | "admin" | "lead" | 
 ];
 
 export default function LoginPage() {
+
+    const { login } = useAuth();
+
     const [user, setUser] = useState<LoginUser>({
         role: "student",
         email: "",
@@ -91,15 +94,7 @@ export default function LoginPage() {
                 user.email, "password:", user.password);
 
 
-            const data = await loginRequest(user);
-
-            // @ts-ignore
-            if (data["success"]){
-                navigate("/dashboard");
-            }else{
-                alert(data.error)
-            }
-
+            await login(user).then(() => navigate("/dashboard"));
 
         } else {
             alert("Missing required fields");
