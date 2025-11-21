@@ -234,7 +234,7 @@ export const LeadPage = () => {
                                     <option>-- Select Course --</option>
 
                                     {
-                                        courses.length > 0 ? courses.map((course, index) => (
+                                        courses && courses.length > 0 ? courses.map((course, index) => (
 
                                             <option value={course} key={index}>{course}</option>
 
